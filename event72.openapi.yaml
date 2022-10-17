@@ -1,0 +1,564 @@
+openapi: 3.0.1
+info:
+  title: /{domain}/{retailer}/itm/event72/v1
+  description: Consignmnet Event 72 - V1.0.0
+  version: v1
+servers:
+  - url: https://{endpointurl}
+paths:
+  /:
+    post:
+      summary: POST
+      operationId: post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/event72-v1'
+            example:
+              Version: string
+              retailerIdentifierType:
+                retailerIdentifierType: string
+                retailerIdentifierCode: string
+                traceID: string
+                BusinessUnitCodeMessageReceiver: string
+                BusinessUnitTypeMessageReceiver: string
+              data:
+                - metaDataHeader:
+                    contentId: string
+                    contentLatestUpdateDate: string
+                    contentVersion: 0
+                    contentIdMapping: string
+                    contentRoutingIdentifier:
+                      - code: string
+                        type: STO
+                        class: string
+                  dataObjectValue:
+                    ConsignmentReference:
+                      CreatorReference:
+                        BusinessUnitCode: string
+                        BusinessUnitType: string
+                      Number: string
+                    SupplyChainEventBase:
+                      Rec24Code: 0
+                      SubCode: 0
+                      ReasonCode:
+                        - Identifier: string
+                          Value: string
+                      SourceSystemTransmissionReference:
+                        Name: string
+                        TransmissionNumber: 0
+                      SourceSystemTransmissionDateTime: string
+                      EventDateTime: string
+                      EventLocation:
+                        LocationReference:
+                          BusinessUnitCode: string
+                          BusinessUnitType: string
+                          BusinessUnitSequence: 0
+                        LocationDescription: string
+                      ResponsibleParty:
+                        User: string
+                        BusinessUnitAddressReference:
+                          BusinessUnitCode: string
+                          BusinessUnitType: string
+                          BusinessUnitSequence: 0
+                        ReportDateTime: string
+                      CausingPartyReference:
+                        BusinessUnitCode: string
+                        BusinessUnitType: string
+                    ConsignmentEvent72-DefaultServiceData:
+                      ServiceLine:
+                        - Sequence: 0
+                          ItemReference:
+                            ItemNumber: string
+                            ItemType: ART
+                          ItemSupplierReference:
+                            BusinessUnitCode: string
+                            BusinessUnitType: string
+                          ItemNameStandardRepresentation: string
+                          UnitLoadSSCC: string
+                          ProductionWeek: string
+                          ProductionBatch: string
+                          CountryOfOrigin:
+                            CountryCode: string
+                          TradeStatus: 0
+                          CustomerDistributionUnitReference:
+                            Number: string
+                          ExpectedQuantity:
+                            Quantity: 0
+                            UOMCode: NAR
+                          ReceivedUndamagedQuantity:
+                            Quantity: 0
+                            UOMCode: NAR
+                          ReceivedDamagedQuantity:
+                            Quantity: 0
+                            UOMCode: NAR
+      responses:
+        '200':
+          description: ''
+        '400':
+          description: ''
+components:
+  schemas:
+    event72-v1:
+      required:
+        - Version
+        - retailerIdentifierType
+        - data
+      type: object
+      properties:
+        Version:
+          maxLength: 6
+          minLength: 1
+          type: string
+          description: Schema version number. Schema versioning needs to be defined
+        retailerIdentifierType:
+          required:
+            - retailerIdentifierType
+            - retailerIdentifierCode
+            - traceID
+            - BusinessUnitCodeMessageReceiver
+            - BusinessUnitTypeMessageReceiver
+          type: object
+          properties:
+            retailerIdentifierType:
+              maxLength: 3
+              minLength: 1
+              type: string
+              description: CBD Class Unit Type of the Group. Always LIG (stands for LEGAL IKEA GROUPING).
+            retailerIdentifierCode:
+              maxLength: 5
+              minLength: 1
+              type: string
+              description: CBD Class Unit Code of the Group. Acting in this context as legal code of the Retailer. E.g. corresponding code for HOUSEMARKET is 017
+            traceID:
+              type: string
+              description: Format needs to be defined by the CEM model
+            BusinessUnitCodeMessageReceiver:
+              maxLength: 5
+              minLength: 1
+              type: string
+              description: Code for receiving Business Unit
+            BusinessUnitTypeMessageReceiver:
+              maxLength: 3
+              minLength: 1
+              type: string
+              description: 'Type of Receiving Business Unit: '
+        data:
+          maxItems: 1
+          minItems: 1
+          type: array
+          items:
+            required:
+              - metaDataHeader
+              - dataObjectValue
+            type: object
+            properties:
+              metaDataHeader:
+                required:
+                  - contentId
+                  - contentLatestUpdateDate
+                type: object
+                properties:
+                  contentId:
+                    type: string
+                    description: 'The string describing the unique identifier for the message. This has to be sent from the provider and the provider will guarantee that that it is the always same for a data set. If there are multiple fields that makes up the unique id for a dataset, then the contentId can be a - concatenated string containing the fields needed'
+                  contentLatestUpdateDate:
+                    type: string
+                    description: the latestUpdateDate which reflects the latest update of the change in the dataset in ISO 8601 format with 3 digits for millis.
+                    format: date-time
+                  contentVersion:
+                    type: integer
+                    description: An incremental integer attribute that can be used by a consumer system to sort and identify the latest snapshot of the message at consumer end. It could be an exact representation of the contentLatestUpdateDate also in milliseconds format since epoch(1970-01-01).
+                  contentIdMapping:
+                    type: string
+                    description: shows the columns that are part of contentId
+                  contentRoutingIdentifier:
+                    minItems: 1
+                    type: array
+                    items:
+                      required:
+                        - code
+                        - type
+                      type: object
+                      properties:
+                        code:
+                          pattern: '[0-9A-Z]{2,5}'
+                          type: string
+                        type:
+                          enum:
+                            - STO
+                            - RU
+                            - COM
+                            - CDC
+                          type: string
+                        class:
+                          type: string
+                      additionalProperties: false
+                      description: 'Data that is steering EBBAs filter logic, for example if we only want to send a subset of data to one Company (optional, can be created by EBBA as well as long data exists               in dataObjectValues). Filter logic can only handle BusinessUnitType = Store, BusinessUnitType = RetailUnit, BusinessUnitType = Company, BusinessUnitType = CDC '
+                additionalProperties: false
+                description: 'The meta data header of the object having the contentId, contentLatestUpdateDate and optional contentRoutingIdentifier'
+              dataObjectValue:
+                required:
+                  - ConsignmentReference
+                  - SupplyChainEventBase
+                type: object
+                oneOf:
+                  - required:
+                      - ConsignmentEvent72-DefaultServiceData
+                properties:
+                  ConsignmentReference:
+                    required:
+                      - CreatorReference
+                      - Number
+                    type: object
+                    properties:
+                      CreatorReference:
+                        required:
+                          - BusinessUnitCode
+                          - BusinessUnitType
+                        type: object
+                        properties:
+                          BusinessUnitCode:
+                            pattern: '[0-9A-Z]{3,5}|AP'
+                            type: string
+                            description: 'The BusinessUnitCode is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitCode is unique per business unit type and contains a minimum of 3 and maximum of 5 characters in the range 0-9 and A-Z. BusinessUnitCodes that consist of numbers below 100 are filled with leading zeros in order to reach a total length of 3 digits (for example ''001'', ''099''). In order to avoid confusion, leading zeros are in general not used in BusinessUnitCCodes that have a length bigger than 3 digits. Note that this handling of leading zeros apply only to BusinessUnitCodes that solely consist of characters 0-9. There is one (temporary) exception to the minimum length of 3 characters, and that is for a virtual business unit called ''AP REG'' that was used for service agreement owners before 2017-02. Only historic data is expected to use this pattern.'
+                          BusinessUnitType:
+                            pattern: '[A-Z]{2,3}'
+                            type: string
+                            description: 'The BusinessUnitType is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitType is a string describing the type of a business unit and used together with the BusinessUnitCode to uniquely identify a business unit. A BusinessUnitType contains a minimum of 2 and a maximum of 3 characters in the range A-Z. Examples are STO (store), SUP (supplier), DT (distribution terminal), and COM (company)'
+                        additionalProperties: false
+                        description: 'The creator of the consignment, as business unit code with a business unit type as defined as a valid business unit in Corporate Base Data (CBD). This is set to the consignor.QCID2945'
+                      Number:
+                        type: string
+                        description: 'For consignments created in ITM, the consignment number is starting with a capital letter I, followed by a sequence from 0,000,000,000n to 9,999,999,999n (fixed length, 10 digits plus 1 check digit denoted as ''n'' above). Starting with the capital letter I prevents any leading zeroes and still ensures a correct sorting sequence. The one trailing check digit completes the consignment number, utilising the LUHN checksum algorithm. The purpose of the check digit is to detect typing errors. The consignment number sequence will not be reset per consignor business unit, but be unique in its own. By that, it is possible to search on the consignment number only, without the need to utilise the consignor business unit code and type at the same time. However, the consignment identifier is only complete including that information, as stated above. The sequence of 10 usable digits will last for approximately 4500 years with a creation rate of 2.2 million consignments per year. A consignment number is never recycled. In legacy systems, the identifier may also start with another string instead of the capital letter ''I'' (e.g. ''ECIS''), and also have a number following a different pattern. For legacy consignments, the identifier is only guaranteed to be unique in its entirety together with the consignor reference, not to follow above pattern. QCID2945'
+                    additionalProperties: false
+                    description: The consignment that this event shall be created against
+                  SupplyChainEventBase:
+                    required:
+                      - Rec24Code
+                      - EventDateTime
+                      - EventLocation
+                      - ResponsibleParty
+                    type: object
+                    properties:
+                      Rec24Code:
+                        minimum: 1
+                        type: integer
+                        description: All supply chain events have an UNECE Recommendation 24 code to follow the industry standard.
+                      SubCode:
+                        type: integer
+                        description: Some events have sub-codes to further differentiate them under the same basic event.
+                      ReasonCode:
+                        type: array
+                        items:
+                          required:
+                            - Identifier
+                            - Value
+                          type: object
+                          properties:
+                            Identifier:
+                              type: string
+                              description: 'The identifier of this reason code, as free text, up to 50 characters long'
+                            Value:
+                              type: string
+                              description: 'The value associated to the reason code identfier, up to 1000 characters long'
+                          additionalProperties: false
+                        description: 'A reason code further qualifies the event, typically from a list of predefined choices. The reason code identifier groups several possible values under one ''heading'', for example an identifier of ''LOADING DELAY REASON'' can lead to a value of ''CARRIER LATE'' or ''SUPPLIER LATE''. The actual identifiers and values are implementation-specific and not prescribed by the CEM schema.'
+                      SourceSystemTransmissionReference:
+                        required:
+                          - Name
+                          - TransmissionNumber
+                        type: object
+                        properties:
+                          Name:
+                            type: string
+                            description: 'The name of the source system, in capital ASCII letters and digits only (A to Z, 0 to 1, dashes and underscores are allowed). In case the system has multiple instances, the instance should be encoded in this system as well, e.g. GTS-001-DT. The system name must not conflict with other system names in use. The system name makes the entire transmission identification unique.'
+                          TransmissionNumber:
+                            type: integer
+                            description: 'A transmission number that is unique within the same source system name. It does not need to be unique without the source system name, i.e. different source systems can use the same number range. Any further definition is up to the source system, but it needs to be strictly increasing, to allow to order by it.'
+                        additionalProperties: false
+                        description: 'In case an event originated from outside the system of record (e.g. ITM), the source system is encouraged to provide its name and a transmission number to correlate its input with further processing inside ITM and also with the published object and further processing in subscribing systems, allowing for an end-to-end monitoring of transactions across multiple systems with ITM in the middle. QCID 22647'
+                      SourceSystemTransmissionDateTime:
+                        type: string
+                        description: 'In case an event originated from outside ITM, the source system is encouraged to provide its name and a transmission number to correlate its input with further processing inside ITM and also with the published object and further processing in subscribing systems, allowing for an end-to-end monitoring of transactions across multiple systems with ITM in the middle. A timestamp of the transmission should also be provided. QCID 22674'
+                        format: date-time
+                      EventDateTime:
+                        type: string
+                        description: 'This timestamp corresponds to the physical event happening, irrespective of when the event got recorded or transmitted'
+                        format: date-time
+                      EventLocation:
+                        type: object
+                        oneOf:
+                          - required:
+                              - LocationReference
+                          - required:
+                              - LocationDescription
+                        properties:
+                          LocationReference:
+                            required:
+                              - BusinessUnitCode
+                              - BusinessUnitType
+                              - BusinessUnitSequence
+                            type: object
+                            properties:
+                              BusinessUnitCode:
+                                pattern: '[0-9A-Z]{3,5}|AP'
+                                type: string
+                                description: 'The BusinessUnitCode is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitCode is unique per business unit type and contains a minimum of 3 and maximum of 5 characters in the range 0-9 and A-Z. BusinessUnitCodes that consist of numbers below 100 are filled with leading zeros in order to reach a total length of 3 digits (for example ''001'', ''099''). In order to avoid confusion, leading zeros are in general not used in BusinessUnitCCodes that have a length bigger than 3 digits. Note that this handling of leading zeros apply only to BusinessUnitCodes that solely consist of characters 0-9. There is one (temporary) exception to the minimum length of 3 characters, and that is for a virtual business unit called ''AP REG'' that was used for service agreement owners before 2017-02. Only historic data is expected to use this pattern.'
+                              BusinessUnitType:
+                                pattern: '[A-Z]{2,3}'
+                                type: string
+                                description: 'The BusinessUnitType is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitType is a string describing the type of a business unit and used together with the BusinessUnitCode to uniquely identify a business unit. A BusinessUnitType contains a minimum of 2 and a maximum of 3 characters in the range A-Z. Examples are STO (store), SUP (supplier), DT (distribution terminal), and COM (company)'
+                              BusinessUnitSequence:
+                                type: integer
+                                description: 'The next level below the business unit is the identification of the address by a sequence number. With this it is possible to handle the Main unit as well as different sub-units of one single business unit. (e.g. MAIN = main address of a business unit, for example sequence 1; REC = external warehouse of a store, for example sequence 2)'
+                            additionalProperties: false
+                            description: 'The place where the event has happened, as IKEA business unit address (e.g. a supplier''s factory, a DC, a store''s EMPU, a CP etc.)'
+                          LocationDescription:
+                            type: string
+                            description: 'The place where the event has happened, in a situation where it cannot be mapped to an IKEA business unit address. This is exceptional, most events happen at known locations.'
+                        additionalProperties: false
+                        description: 'The place where the event has happened. This could be an IKEA business unit address (e.g. a supplier''s factory, a DC, a store''s EMPU, a CP etc), or a place that cannot be found in CBD, as a country''s border. The most significant events such as departure and arrival, despatch and receive do happen at business unit locations.'
+                      ResponsibleParty:
+                        required:
+                          - BusinessUnitAddressReference
+                          - ReportDateTime
+                        type: object
+                        properties:
+                          User:
+                            type: string
+                            description: 'The username (logon id) of the user who has entered the event, where permitted by law, and where known. Technical user ids can be given for events received via integration, derived events, or events triggered by recurring processes.'
+                          BusinessUnitAddressReference:
+                            required:
+                              - BusinessUnitCode
+                              - BusinessUnitType
+                              - BusinessUnitSequence
+                            type: object
+                            properties:
+                              BusinessUnitCode:
+                                pattern: '[0-9A-Z]{3,5}|AP'
+                                type: string
+                                description: 'The BusinessUnitCode is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitCode is unique per business unit type and contains a minimum of 3 and maximum of 5 characters in the range 0-9 and A-Z. BusinessUnitCodes that consist of numbers below 100 are filled with leading zeros in order to reach a total length of 3 digits (for example ''001'', ''099''). In order to avoid confusion, leading zeros are in general not used in BusinessUnitCCodes that have a length bigger than 3 digits. Note that this handling of leading zeros apply only to BusinessUnitCodes that solely consist of characters 0-9. There is one (temporary) exception to the minimum length of 3 characters, and that is for a virtual business unit called ''AP REG'' that was used for service agreement owners before 2017-02. Only historic data is expected to use this pattern.'
+                              BusinessUnitType:
+                                pattern: '[A-Z]{2,3}'
+                                type: string
+                                description: 'The BusinessUnitType is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitType is a string describing the type of a business unit and used together with the BusinessUnitCode to uniquely identify a business unit. A BusinessUnitType contains a minimum of 2 and a maximum of 3 characters in the range A-Z. Examples are STO (store), SUP (supplier), DT (distribution terminal), and COM (company)'
+                              BusinessUnitSequence:
+                                type: integer
+                                description: 'The next level below the business unit is the identification of the address by a sequence number. With this it is possible to handle the Main unit as well as different sub-units of one single business unit. (e.g. MAIN = main address of a business unit, for example sequence 1; REC = external warehouse of a store, for example sequence 2)'
+                            additionalProperties: false
+                            description: The business unit address that is responsible for the event registration
+                          ReportDateTime:
+                            type: string
+                            description: 'The date and time when the event was registered. That does not need to be the same as the time the event happened - it can be entered later. But it is not possible to enter an event in the future, so the ReportDateTime can never be earlier than the EventDateTime'
+                            format: date-time
+                        additionalProperties: false
+                        description: The responsible party enters the event and makes it known to the system.
+                      CausingPartyReference:
+                        required:
+                          - BusinessUnitCode
+                          - BusinessUnitType
+                        type: object
+                        properties:
+                          BusinessUnitCode:
+                            pattern: '[0-9A-Z]{3,5}|AP'
+                            type: string
+                            description: 'The BusinessUnitCode is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitCode is unique per business unit type and contains a minimum of 3 and maximum of 5 characters in the range 0-9 and A-Z. BusinessUnitCodes that consist of numbers below 100 are filled with leading zeros in order to reach a total length of 3 digits (for example ''001'', ''099''). In order to avoid confusion, leading zeros are in general not used in BusinessUnitCCodes that have a length bigger than 3 digits. Note that this handling of leading zeros apply only to BusinessUnitCodes that solely consist of characters 0-9. There is one (temporary) exception to the minimum length of 3 characters, and that is for a virtual business unit called ''AP REG'' that was used for service agreement owners before 2017-02. Only historic data is expected to use this pattern.'
+                          BusinessUnitType:
+                            pattern: '[A-Z]{2,3}'
+                            type: string
+                            description: 'The BusinessUnitType is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitType is a string describing the type of a business unit and used together with the BusinessUnitCode to uniquely identify a business unit. A BusinessUnitType contains a minimum of 2 and a maximum of 3 characters in the range A-Z. Examples are STO (store), SUP (supplier), DT (distribution terminal), and COM (company)'
+                        additionalProperties: false
+                        description: 'The causing party is responsible for the situation that led to registering the event, for example in a delay situation at a business unit location, it could be because of the carrier being late, or because of the business unit not being ready with preparations.'
+                    additionalProperties: false
+                    description: 'The base data for this event, with the Rec24Code and possibly a sub-code'
+                  ConsignmentEvent72-DefaultServiceData:
+                    required:
+                      - ServiceLine
+                    type: object
+                    properties:
+                      ServiceLine:
+                        type: array
+                        items:
+                          required:
+                            - Sequence
+                            - ReceivedUndamagedQuantity
+                            - ReceivedDamagedQuantity
+                          type: object
+                          properties:
+                            Sequence:
+                              minimum: 0
+                              type: integer
+                              description: 'The lines of a consignment are numbered starting with 1. The lines are never renumbered in case a line is found missing; instead, the line is kept with the quantities set to zero. Any additional lines added during the consignment''s lifecycle get a number one higher than the currently highest sequence. On service interfaces into ITM, a sequence number of 0 is also permitted. This means that ITM will allocate the next available positive sequence number. On published consignments, a line sequence number is never 0, this is only allowed on inbound service interfaces.'
+                            ItemReference:
+                              required:
+                                - ItemNumber
+                                - ItemType
+                              type: object
+                              properties:
+                                ItemNumber:
+                                  type: string
+                                  description: Together with the item type it is the unique identifier for an item within IKEA.
+                                ItemType:
+                                  enum:
+                                    - ART
+                                    - CCI
+                                    - ADS
+                                    - OAD
+                                    - SPR
+                                    - SGR
+                                    - HM
+                                  type: string
+                                  description: 'A classification of the item, for example ART for sellable articles and ADS for various non-sellable articles such as but not limited to handling material.'
+                              additionalProperties: false
+                              description: 'The item on the consignment line. This information is also available on the referenced consignment line, but is repeated here both as a security measure and for convenience. This element is optional only to cater to so-called ''other items'' which do not have an item number from the item master data (PIA), for example when various articles are sent to the as-is area in the store.'
+                            ItemSupplierReference:
+                              required:
+                                - BusinessUnitCode
+                                - BusinessUnitType
+                              type: object
+                              properties:
+                                BusinessUnitCode:
+                                  pattern: '[0-9A-Z]{3,5}|AP'
+                                  type: string
+                                  description: 'The BusinessUnitCode is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitCode is unique per business unit type and contains a minimum of 3 and maximum of 5 characters in the range 0-9 and A-Z. BusinessUnitCodes that consist of numbers below 100 are filled with leading zeros in order to reach a total length of 3 digits (for example ''001'', ''099''). In order to avoid confusion, leading zeros are in general not used in BusinessUnitCCodes that have a length bigger than 3 digits. Note that this handling of leading zeros apply only to BusinessUnitCodes that solely consist of characters 0-9. There is one (temporary) exception to the minimum length of 3 characters, and that is for a virtual business unit called ''AP REG'' that was used for service agreement owners before 2017-02. Only historic data is expected to use this pattern.'
+                                BusinessUnitType:
+                                  pattern: '[A-Z]{2,3}'
+                                  type: string
+                                  description: 'The BusinessUnitType is part of a reference to a business unit in IKEA Corporate Base Data, CBD. A business unit is an addressable and unique unit essential for IKEA�s business. The BusinessUnitType is a string describing the type of a business unit and used together with the BusinessUnitCode to uniquely identify a business unit. A BusinessUnitType contains a minimum of 2 and a maximum of 3 characters in the range A-Z. Examples are STO (store), SUP (supplier), DT (distribution terminal), and COM (company)'
+                              additionalProperties: false
+                              description: 'The supplier who manufactured the item referenced. Items of the same number are not 100% identical when manufactured by different suppliers, so this information further differentiates them. This element is optional only to cater to so-called ''other items'' which do not have an item number from the item master data (PIA), for example when various articles are sent to the as-is area in the store.'
+                            ItemNameStandardRepresentation:
+                              type: string
+                              description: 'This element normally is the English item name as given by IKEA''s item master data system, PIA. For so-called special items (for example, articles for the as-is area in the store) which do not have an item reference, this can be set to any text. In case this event is originating from a system other then ITM, and the item name is unavailable, it may be omitted.'
+                            UnitLoadSSCC:
+                              type: string
+                              description: A unit load can be identified by the industry standard SSCC identifier.
+                            ProductionWeek:
+                              type: string
+                              description: 'The production week indicates for traceability reasons in which week a product was built. In case the consignment line contains items from multiple production weeks, all of them will be noted on the consignment line. It is not possible to register how man of those items were built in a specific production week, just that at least one is present from each week. Example: a consignment line consists of 10 pieces of item 29927561 (Billy bookcase). However, the supplier produced 7 pieces in week 12, and 3 pieces in week 14. The consignment line will list ''10 * 29927561 ART, week(s) 12 and 14''.'
+                            ProductionBatch:
+                              type: string
+                              description: 'The production batch indicates for traceability reasons in which production line and time frame a product was built. In case the consignment line contains items from multiple production batches, all of them will be noted on the consignment line. It is not possible to register how man of those items were built in a specific production batch, just that at least one is present for each batch. Example: a consignment line consists of 10 pieces of item 29927561 (Billy bookcase). However, the supplier produced 7 pieces in batch A, and 3 pieces in batch B. The consignment line will list ''10 * 29927561 ART, batch(es) A and B''.'
+                            CountryOfOrigin:
+                              required:
+                                - CountryCode
+                              type: object
+                              properties:
+                                CountryCode:
+                                  pattern: '[A-Z]{2}'
+                                  type: string
+                                  description: The country expressed as ISO 3166-1 alpha-2 code (two letters)
+                              additionalProperties: false
+                              description: Country of origin is provided by the supplier and needed for customs declarations. QCID20445
+                            TradeStatus:
+                              enum:
+                                - 0
+                                - 1
+                                - 2
+                              type: integer
+                              description: 'Trade status is an internal IKEA code and informs if a product fulfils the rules in the PAN-European Free Trade Agreement. (EU, EFTA & TURKEY) Trade Status is used in IKEA''s system: - When moving goods between different countries to avoid paying unnecessary duty - To get correct duty rate in CALC. It has the following values: 0: New article. No Trade status decided. Gets normal duty rate in CALC. 1: The goods are sufficiently processed according to the preferential rules. Gets preferential duty rate in CALC. The trade status is registered in CAIS. 2: Third country goods (outside a free trade area) or origin in a free trade area but insufficiently processed (liable for duty in the consignee country). Gets normal duty rate in CALC. The trade status is not registered in CAIS. QCID20444'
+                            CustomerDistributionUnitReference:
+                              required:
+                                - Number
+                              type: object
+                              properties:
+                                Number:
+                                  type: string
+                                  description: Customer order deliveries (in Europe) are grouped into units of distribution with their own identifier. This identifier is used by the service provider in communication towards IKEA.
+                              additionalProperties: false
+                              description: Customer order deliveries (in Europe) are grouped into units of distribution with their own identifier. This identifier is used by the service provider in communication towards IKEA.
+                            ExpectedQuantity:
+                              required:
+                                - Quantity
+                                - UOMCode
+                              type: object
+                              properties:
+                                Quantity:
+                                  type: number
+                                  description: 'A countable quantity of anobject, with 2 fractional digits in a total of 9 digits, and represented in the accompanying unit of measurement (see UOMCode)'
+                                UOMCode:
+                                  enum:
+                                    - NAR
+                                    - PK
+                                    - MTR
+                                    - DMT
+                                    - CMT
+                                    - MMT
+                                    - SHP
+                                    - SHPUNIT
+                                    - CSM
+                                  type: string
+                                  description: Unit of measurement for count of objects. Mostly PK for pieces and MTR (meters) and CMT (centimeters) for so-called meterware (fabrics). See type restrictions for all possible values that might get into usage.
+                              additionalProperties: false
+                              description: 'The quantity as expected by the receiving system, i.e. the latest known quantity, including all updates and corrections prior to the receive. This optional element is only needed to report back to CNS. ITM does not need the value, as it keeps the currently known values on its own. If a system cannot provide the expected quantity, it needs to report discrepancies to CNS via the system area. As soon as CNS is retired from the system landscape, this element will be removed from the next upcoming CEM release.'
+                            ReceivedUndamagedQuantity:
+                              required:
+                                - Quantity
+                                - UOMCode
+                              type: object
+                              properties:
+                                Quantity:
+                                  type: number
+                                  description: 'A countable quantity of anobject, with 2 fractional digits in a total of 9 digits, and represented in the accompanying unit of measurement (see UOMCode)'
+                                UOMCode:
+                                  enum:
+                                    - NAR
+                                    - PK
+                                    - MTR
+                                    - DMT
+                                    - CMT
+                                    - MMT
+                                    - SHP
+                                    - SHPUNIT
+                                    - CSM
+                                  type: string
+                                  description: Unit of measurement for count of objects. Mostly PK for pieces and MTR (meters) and CMT (centimeters) for so-called meterware (fabrics). See type restrictions for all possible values that might get into usage.
+                              additionalProperties: false
+                              description: 'The quantity received in undamaged, usable condition. Damaged and undamaged quantity may or may not add up to the expected quantity. In case they do not add up, we have an underdelivery (shortlanded) in addition to the damage, in case they exceed, we have an overdelivery (overlanded) in addition to the damage.'
+                            ReceivedDamagedQuantity:
+                              required:
+                                - Quantity
+                                - UOMCode
+                              type: object
+                              properties:
+                                Quantity:
+                                  type: number
+                                  description: 'A countable quantity of anobject, with 2 fractional digits in a total of 9 digits, and represented in the accompanying unit of measurement (see UOMCode)'
+                                UOMCode:
+                                  enum:
+                                    - NAR
+                                    - PK
+                                    - MTR
+                                    - DMT
+                                    - CMT
+                                    - MMT
+                                    - SHP
+                                    - SHPUNIT
+                                    - CSM
+                                  type: string
+                                  description: Unit of measurement for count of objects. Mostly PK for pieces and MTR (meters) and CMT (centimeters) for so-called meterware (fabrics). See type restrictions for all possible values that might get into usage.
+                              additionalProperties: false
+                              description: 'The quantity received in damaged condition. Damaged and undamaged quantity may or may not add up to the expected quantity. In case they do not add up, we have an underdelivery (shortlanded) in addition to the damage, in case they exceed, we have an overdelivery (overlanded) in addition to the damage.'
+                          additionalProperties: false
+                        description: 'The quantity received in damaged condition. Damaged and undamaged quantity may or may not add up to the expected quantity. In case they do not add up, we have an underdelivery (shortlanded) in addition to the damage, in case they exceed, we have an overdelivery (overlanded) in addition to the damage.'
+                    additionalProperties: false
+                    description: this element holds the data that is specific to the event interface
+                additionalProperties: false
+                description: 'the exact data that will be sent as part of the distribution. It is now just shown as a placeholder, the provider will define the structure of this object and its properties'
+            additionalProperties: false
+          description: List of contents having metaDataHeader and dataObjectValues
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      name: api-key
+      in: header
+    apiKeyQuery:
+      type: apiKey
+      name: api-key
+      in: query
+security:
+  - { }
+  - apiKeyHeader: [ ]
+  - apiKeyQuery: [ ]
