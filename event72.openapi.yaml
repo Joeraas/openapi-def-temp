@@ -14,7 +14,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/event72-v1'
+              $ref: '#/components/schemas/event72-v3'
             example:
               Version: string
               retailerIdentifierType:
@@ -100,7 +100,7 @@ paths:
           description: ''
 components:
   schemas:
-    event72-v1:
+    event72-v3:
       required:
         - Version
         - retailerIdentifierType

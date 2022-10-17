@@ -14,7 +14,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/shipment-v1'
+              $ref: '#/components/schemas/shipment-v2'
       responses:
         '200':
           description: ''
@@ -22,7 +22,7 @@ paths:
           description: ''
 components:
   schemas:
-    shipment-v1:
+    shipment-v2:
       required:
         - contentSource
         - contentInterface
