@@ -4,7 +4,7 @@ info:
   description: Consignment Shipment API - V1.0.0
   version: v1
 servers:
-  - url: https://logic-rpic-afg-rdg-ts-weu.azurewebsites.net:443/api/wf-itmcns-shp-in-v1/triggers/manual/invoke
+  - url: https://{endpointurl}
 paths:
   /:
     post:
