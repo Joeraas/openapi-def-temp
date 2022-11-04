@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: /{domain}/{retailer}/itm/shipment/v1
+  title: asg/ae/rdg/itmcns
   description: Consignment Shipment API - V1.0.0
   version: v1
 servers:
